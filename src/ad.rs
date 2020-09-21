@@ -9,7 +9,7 @@ pub type V3 = Vector3D<f64, UnknownUnit>;
 
 #[derive(Clone)]
 pub struct Val {
-    pub v: Arc<Fn(P3) -> (f64, V3)>,
+    pub v: Arc<dyn Fn(P3) -> (f64, V3)>,
 }
 
 impl Val {
@@ -48,7 +48,7 @@ impl Val {
     // dist = ((x - x_0)^2 + (y - y_0)^2 + (z - z_0)^2) ^ 0.5
     // dist = (f . g)(x), f(x) = sqrt(x), g = ((x - x_0)^2 + C + D)
     // d_dist/dx = f'(g(x)) * g'(x)
-    // d_dist/dx =  0.5( dist_squared )^(-0.5) * (2*x - x_0)
+    // d_dist/dx =  0.5( dist_squared )^(-0.5) * 2*(x - x_0)
     pub fn distance_from(p: P3) -> Val {
         Val {
             v: Arc::new(move |x: P3| {
@@ -56,13 +56,10 @@ impl Val {
                     (x.x - p.x).powf(2.0) + (x.y - p.y).powf(2.0) + (x.z - p.z).powf(2.0);
                 let dist_squared = if dist_squared == 0.0 { 1e-10 } else { dist_squared };
                 let dist = dist_squared.powf(0.5);
-                let dx = (0.5 * dist_squared).powf(-0.5) * (2.0 * x.x - p.x);
-                // let dx = 2.0 * (x.x - p.x);
-                // let dy = 2.0 * (x.y - p.y);
-                let dy = (0.5 * dist_squared).powf(-0.5) * (2.0 * x.y - p.y);
-                // let dz = 2.0 * (x.z - p.z);
-                let dz = (0.5 * dist_squared).powf(-0.5) * (2.0 * x.z - p.z);
-                let d = V3::new(dx, dy, dz); // This is incorrect
+                let dx = (0.5 * dist_squared).powf(-0.5) * 2.0 * (x.x - p.x);
+                let dy = (0.5 * dist_squared).powf(-0.5) * 2.0 * (x.y - p.y);
+                let dz = (0.5 * dist_squared).powf(-0.5) * 2.0 * (x.z - p.z);
+                let d = V3::new(dx, dy, dz);
                 (dist, d)
             }),
         }

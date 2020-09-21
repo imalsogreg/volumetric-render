@@ -17,10 +17,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let y3 = y1.clone().exp();
     let y3 = y1 * (y2.exp()) + y3;
     let y3 = y3 * Val::c(0.2);
-    let gauss = g(P3::new(1.0, 0.5, 0.0), Covariance::unit());
-    let gauss2 = g(P3::new(-6.0, -10.0, 0.0), Covariance::unit());
+    let gauss = g(P3::new(-0.0, 0.5, 0.0), Covariance::unit());
+    let gauss2 = g(P3::new(-1.0, -5.0, 0.0), Covariance::unit());
 
-    let pdf = y3 + gauss * Val::c(0.8) + gauss2;
+    let pdf = gauss * Val::c(0.8) + gauss2 * Val::c(0.8);
 
     let x = P3::new(1.0, 0.0, 0.0);
 
@@ -34,23 +34,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (left,right) = root.split_vertically(300);
     let ((nw, sw), (ne,se)) = (left.split_horizontally(300), right.split_horizontally(300));
 
-    let charts : Vec<(AreaS, Box<dyn Fn(Val, P3) -> f64>)>= vec![
-        (nw, Box::new(|v: Val, x: P3| { v.f(x) })),
-        (ne, Box::new(|v: Val, x: P3| { v.df(x).x })),
-        (sw, Box::new(|v: Val, x: P3| { v.df(x).y })),
-        (se, Box::new(|v: Val, x: P3| { v.df(x).z })),
+    let charts : Vec<(AreaS, Box<dyn Fn(Val, P3) -> f64>, f64)>= vec![
+        (nw, Box::new(|v: Val, x: P3| { v.f(x)    }), 0.0),
+        (ne, Box::new(|v: Val, x: P3| { v.df(x).x }), -1.0),
+        (sw, Box::new(|v: Val, x: P3| { v.df(x).y }), -1.0),
+        (se, Box::new(|v: Val, x: P3| { v.df(x).z }), -1.0),
     ];
 
     root.fill(&WHITE)?;
 
-    for (root, project) in charts.into_iter() {
+    for (root, project, c_min) in charts.into_iter() {
         let my_pdf = pdf.clone();
 
         let mut f_chart = ChartBuilder::on(&root)
             .margin(20)
             .x_label_area_size(10)
             .y_label_area_size(10)
-            .build_cartesian_2d(-10.0f64..10.0f64, -20.0f64..20.0f64)?;
+            .build_cartesian_2d(-15.0f64..15.0f64, -15.0f64..15.0f64)?;
 
         f_chart
             .configure_mesh()
@@ -66,7 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let (xr, yr) = (f_chart.x_range(), f_chart.y_range());
 
 
-        plot_pdf_value(plotting_area, my_pdf, xr, yr, pw, ph, project)?;
+        plot_pdf_value(plotting_area, my_pdf, xr, yr, pw, ph, project, c_min)?;
 
     }
 
@@ -89,12 +89,13 @@ fn plot_pdf_value(
     pw: i32,
     ph: i32,
     project: impl Fn(Val, P3) -> f64,
+    c_min: f64,
 ) -> Result<(), Box<dyn std::error::Error>> {
 
     for (x, y, c) in pdf_slice(pdf, xr, yr, -1.0, (pw as usize, ph as usize), project) {
         plotting_area.draw_pixel(
             (x, y),
-            &RGBColor(clamp(c as f64, 0.0, 1.0), clamp(c as f64, 0.0, 1.0), 0),
+            &RGBColor(clamp(c as f64, c_min, 1.0), clamp(c as f64, 0.0, 1.0), 0),
         )?;
     }
     Ok(())
