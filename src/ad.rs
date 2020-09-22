@@ -54,7 +54,11 @@ impl Val {
             v: Arc::new(move |x: P3| {
                 let dist_squared =
                     (x.x - p.x).powf(2.0) + (x.y - p.y).powf(2.0) + (x.z - p.z).powf(2.0);
-                let dist_squared = if dist_squared == 0.0 { 1e-10 } else { dist_squared };
+                let dist_squared = if dist_squared == 0.0 {
+                    1e-10
+                } else {
+                    dist_squared
+                };
                 let dist = dist_squared.powf(0.5);
                 let dx = (0.5 * dist_squared).powf(-0.5) * 2.0 * (x.x - p.x);
                 let dy = (0.5 * dist_squared).powf(-0.5) * 2.0 * (x.y - p.y);
