@@ -8,9 +8,17 @@ problem I wanted to solve - how can we visualize functions of R3, like a
 distribution](https://en.wikipedia.org/wiki/Multivariate_normal_distribution)
 (MVN), or a gaussian mixture model made of MVNs?
 
-Here is an idea: place a camera at some location, an for each pixel of the camera, cast a ray through the distribution. Integrate the value of the function along that ray. I think this technique is called volumetric rendering?
+Here is an idea: place a camera at some location, an for each pixel of the
+camera, cast a ray through the distribution. Integrate the value of the function
+along that ray. I think this technique is called volumetric rendering?
 
-The best way to numerically integrate a function is to know both the function itself and its first derivative - together these do a good job of estimating the area under the curve. So, I wanted to try also implementing [automatic differentiation](), so that we would get derivatives for free on any R3 function. Today, I'm still too confused about how AD works outside the context of functions from R1 to R1, so I don't end up relying on the derivatives during numerical integration. :)
+The best way to numerically integrate a function is to know both the function
+itself and its first derivative - together these do a good job of estimating the
+area under the curve. So, I wanted to try also implementing [automatic
+differentiation](http://conal.net/papers/beautiful-differentiation/), so that we
+would get derivatives for free on any R3 function. Today, I'm still too confused
+about how AD works outside the context of functions from R1 to R1, so I don't
+end up relying on the derivatives during numerical integration. :)
 
 # Results
 
