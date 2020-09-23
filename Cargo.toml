@@ -10,6 +10,8 @@ edition = "2018"
 frustum = "^0.2.1"
 euclid  = "^0.20"
 plotters = "^0.3.0"
+nalgebra = "^0.22"
+thiserror = "^1.0"
 
 [dev-dependencies]
 image   = "^0.23"

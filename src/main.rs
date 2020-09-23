@@ -20,11 +20,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let y3 = y1.clone().exp();
     let y3 = y1 * (y2.exp()) + y3;
     let y3 = y3 * Val::c(0.2);
-    let gauss = g(P3::new(-0.0, 0.5, 0.0), Covariance::unit());
-    let gauss2 = g(P3::new(-1.0, -5.0, 0.0), Covariance::unit());
-    let gauss3 = g(P3::new(0.0, 0.0, 0.0), Covariance::unit());
+    let gauss = g(P3::new(-0.0, 0.5, 0.0), example_matrix())?;
+    let gauss2 = g(P3::new(-1.0, -5.0, 0.0), unit_matrix())?;
 
-    let pdf = gauss * Val::c(0.8) + gauss2 * Val::c(0.8);
+    let pdf = y3 + gauss * Val::c(0.8) + gauss2 * Val::c(0.8);
     let pdf_2 = pdf.clone();
 
     let x = P3::new(1.0, 0.0, 0.0);
@@ -40,7 +39,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let root = BitMapBackend::new("pdf.png", (600, 600)).into_drawing_area();
     let (left, right) = root.split_vertically(300);
     let ((nw, sw), (ne, se)) = (left.split_horizontally(300), right.split_horizontally(300));
-
 
     let charts: Vec<(AreaS, Box<dyn Fn(Val, P3) -> f64>, f64)> = vec![
         (nw, Box::new(|v: Val, x: P3| v.f(x)), 0.0),
@@ -58,7 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .margin(20)
             .x_label_area_size(10)
             .y_label_area_size(10)
-            .build_cartesian_2d(-15.0f64..15.0f64, -15.0f64..15.0f64)?;
+            .build_cartesian_2d(-5.0f64..5.0f64, -5.0f64..5.0f64)?;
 
         f_chart
             .configure_mesh()
