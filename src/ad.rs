@@ -2,10 +2,11 @@ use std::ops::*;
 use std::sync::Arc;
 
 use euclid::{Point3D, UnknownUnit, Vector3D};
+use frustum::{Vec3, Point3, WorldSpace};
 
-pub type P3 = Point3D<f64, UnknownUnit>;
+pub type P3 = Point3D<f64, WorldSpace>;
 
-pub type V3 = Vector3D<f64, UnknownUnit>;
+pub type V3 = Vector3D<f64, WorldSpace>;
 
 #[derive(Clone)]
 pub struct Val {
@@ -54,7 +55,11 @@ impl Val {
             v: Arc::new(move |x: P3| {
                 let dist_squared =
                     (x.x - p.x).powf(2.0) + (x.y - p.y).powf(2.0) + (x.z - p.z).powf(2.0);
-                let dist_squared = if dist_squared == 0.0 { 1e-10 } else { dist_squared };
+                let dist_squared = if dist_squared == 0.0 {
+                    1e-10
+                } else {
+                    dist_squared
+                };
                 let dist = dist_squared.powf(0.5);
                 let dx = (0.5 * dist_squared).powf(-0.5) * 2.0 * (x.x - p.x);
                 let dy = (0.5 * dist_squared).powf(-0.5) * 2.0 * (x.y - p.y);
