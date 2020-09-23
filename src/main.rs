@@ -23,9 +23,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let y3 = y3 * Val::c(0.2);
     let gauss = g(P3::new(-0.0, 0.5, 0.0), example_matrix())?;
     let gauss2 = g(P3::new(-1.0, -5.0, 0.0), unit_matrix())?;
-    let gauss3 = g(P3::new(0.0, 0.0, 0.0), Matrix3::new(2.0, 0.1, 1.9, 0.1, 2.0, 0.1, 1.9, 0.1, 2.0))?;
+    let gauss3 = g(P3::new(-4.0, 0.0, 0.0), Matrix3::new(2.0, 0.1, 1.9, 0.1, 2.0, 0.1, 1.9, 0.1, 2.0))?;
+    let gauss4 = g(P3::new(-3.0, -3.0, 0.0), Matrix3::new(2.0, 0.1, 1.0, 0.1, 2.0, 0.1, 1.0, 0.1, 1.0))?;
+    let gauss5 = g(P3::new( 3.0, -3.0, -1.0), Matrix3::new(1.0, 0.5, 1.0, 0.1, 2.0, 0.1, 1.0, 0.1, 9.0))?;
 
-    let pdf = gauss * Val::c(0.8) + gauss2 * Val::c(0.8) + gauss3;
+    let pdf =
+        gauss * Val::c(0.8) +
+        gauss2 * Val::c(0.8) +
+        gauss3 * Val::c(0.6) +
+        gauss4 * Val::c(0.4) +
+        gauss5 * Val::c(0.3);
     let pdf_2 = pdf.clone();
 
     let x = P3::new(1.0, 0.0, 0.0);
@@ -129,32 +136,65 @@ fn pdf_slice(
 }
 
 pub fn raytrace(v: Val) -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("raytrace.png", (600,600)).into_drawing_area();
-    root.fill(&WHITE)?;
-    let mut chart = ChartBuilder::on(&root)
-        .margin(20)
-        .x_label_area_size(10)
-        .y_label_area_size(10)
-        .build_cartesian_2d(0.0..600.0, 0.0..600.0)?;
-    chart
-        .configure_mesh()
-        .disable_x_mesh()
-        .disable_y_mesh()
-        .draw()?;
-    let plotting_area = chart.plotting_area();
 
-    let frustum = Frustum {
+    let mut frustum = Frustum {
         origin: P3::new(-5.0, -5.0, -10.0),
         target: P3::new(0.0, 0.0, 0.0),
-        fovy: 60.0,
+        fovy: 90.0,
         ncp: 1.0,
         fcp: 10.0,
-        width: 600,
-        height: 600,
+        width: 300,
+        height: 300,
     };
-    for (x,y,v) in render(v, frustum, 50.0, 1.0, 0.1) {
-        let c = (v * 155.0) as u8;
-        plotting_area.draw_pixel((x,y), &RGBColor(c, c, c))?;
+    for i in (0..40) {
+
+        let fname = String::from(format!("movie/raytrace{:05}.png", i));
+        println!("Working on frame {}", i);
+        let root = BitMapBackend::new(fname.as_str(), (300,300)).into_drawing_area();
+        root.fill(&WHITE)?;
+        let mut chart = ChartBuilder::on(&root)
+            .margin(20)
+            .x_label_area_size(10)
+            .y_label_area_size(10)
+            .build_cartesian_2d(0.0..300.0, 0.0..300.0)?;
+        chart
+            .configure_mesh()
+            .disable_x_mesh()
+            .disable_y_mesh()
+            .draw()?;
+        let plotting_area = chart.plotting_area();
+
+        let my_v = v.clone();
+        let frame_rate = 20.0;
+        let circle_freq = 0.5;
+        let bounce_freq = 0.5;
+        let circle_phase = 2.0 * 3.14159 * i as f64 * circle_freq / frame_rate;
+        // let bounce_phase = 2.0 * 3.14159 * i as f64 * bounce_freq / frame_rate;
+        frustum.origin.x = 5.0 * circle_phase.cos();
+        frustum.origin.z = 5.0 * circle_phase.sin();
+        // frustum.origin.y = 0.2 * bounce_phase.cos();
+        //
+        fn to_range(v: f64, min: f64, max: f64) -> u8 {
+            let v_norm  = (v - min) / (max - min);
+            let v_clamp = v_norm.max(0.0).min(1.0);
+            (v_clamp * 255.0) as u8
+        }
+
+        for (x,y,(v,p)) in render(my_v, frustum, 50.0, 1.0, 0.1) {
+            let c = (v * 155.0) as u8;
+
+            // plotting_area.draw_pixel((x,y), &RGBColor(
+            //     to_range(p.x, -10.0, 10.0),
+            //     to_range(p.y, -10.0, 10.0),
+            //     to_range(p.z, -10.0, 10.0)
+            // ))?;
+
+            plotting_area.draw_pixel((x,y), &RGBColor(
+                to_range(v, 0.0, 2.0),
+                to_range(v, 0.0, 2.0),
+                to_range(v.log(10.0), -2.5, 1.5)
+            ))?;
+        }
     }
     Ok(())
 }

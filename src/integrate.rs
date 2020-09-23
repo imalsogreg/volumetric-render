@@ -11,7 +11,7 @@ pub fn render(
     distance: f64,
     xy_step: f64,
     depth_step: f64,
-) -> Vec<(f64, f64, f64)> {
+) -> Vec<(f64, f64, (f64, P3))> {
     let n_rows = (frustum.height as f64 / xy_step).floor() as u32;
     let n_cols = (frustum.width  as f64 / xy_step).floor() as u32;
     let ks : Vec<u32> = (0..(n_rows as u32 * n_cols as u32)).into_iter().collect();
@@ -24,7 +24,7 @@ pub fn render(
     }).collect()
 }
 
-pub fn integrate(v: &Val, start: P3, direction: Vec3<WorldSpace>, distance: f64, step: f64) -> f64 {
+pub fn integrate(v: &Val, start: P3, direction: Vec3<WorldSpace>, distance: f64, step: f64) -> (f64,P3) {
     let n_steps = (distance / step).floor() as u32;
     let steps : Vec<u32> = (0..n_steps).into_iter().collect();
     steps
@@ -32,7 +32,9 @@ pub fn integrate(v: &Val, start: P3, direction: Vec3<WorldSpace>, distance: f64,
         .map(move |i| {
             let x: P3 = start + direction * Scale::new(step * (*i) as f64);
             let fx = v.f(x);
-            fx * step
+            (fx * step, v.df(x))
         })
-        .sum()
+        .fold( (0.0, P3::new(0.0,0.0,0.0)), |(v_acc,p_acc), (v,p)| {
+            (v_acc + v, p_acc + p)
+        } )
 }
