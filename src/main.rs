@@ -129,13 +129,13 @@ fn pdf_slice(
 }
 
 pub fn raytrace(v: Val) -> Result<(), Box<dyn std::error::Error>> {
-    let root = BitMapBackend::new("raytrace.png", (300,300)).into_drawing_area();
+    let root = BitMapBackend::new("raytrace.png", (600,600)).into_drawing_area();
     root.fill(&WHITE)?;
     let mut chart = ChartBuilder::on(&root)
         .margin(20)
         .x_label_area_size(10)
         .y_label_area_size(10)
-        .build_cartesian_2d(0.0..300.0, 0.0..300.0)?;
+        .build_cartesian_2d(0.0..600.0, 0.0..600.0)?;
     chart
         .configure_mesh()
         .disable_x_mesh()
@@ -144,16 +144,16 @@ pub fn raytrace(v: Val) -> Result<(), Box<dyn std::error::Error>> {
     let plotting_area = chart.plotting_area();
 
     let frustum = Frustum {
-        origin: P3::new(-5.0, -5.0, -5.0),
+        origin: P3::new(-5.0, -5.0, -10.0),
         target: P3::new(0.0, 0.0, 0.0),
-        fovy: 90.0,
+        fovy: 60.0,
         ncp: 1.0,
         fcp: 10.0,
-        width: 300,
-        height: 300,
+        width: 600,
+        height: 600,
     };
-    for (x,y,v) in render(v, frustum, 10.0, 1.0, 1.0) {
-        let c = (v * 255.0) as u8;
+    for (x,y,v) in render(v, frustum, 50.0, 1.0, 0.1) {
+        let c = (v * 155.0) as u8;
         plotting_area.draw_pixel((x,y), &RGBColor(c, c, c))?;
     }
     Ok(())
