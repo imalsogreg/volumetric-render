@@ -170,8 +170,8 @@ pub fn raytrace(v: Val) -> Result<(), Box<dyn std::error::Error>> {
         let bounce_freq = 0.5;
         let circle_phase = 2.0 * 3.14159 * i as f64 * circle_freq / frame_rate;
         // let bounce_phase = 2.0 * 3.14159 * i as f64 * bounce_freq / frame_rate;
-        frustum.origin.x = 5.0 * circle_phase.cos();
-        frustum.origin.z = 5.0 * circle_phase.sin();
+        frustum.origin.x = 10.0 * circle_phase.cos();
+        frustum.origin.z = 10.0 * circle_phase.sin();
         // frustum.origin.y = 0.2 * bounce_phase.cos();
         //
         fn to_range(v: f64, min: f64, max: f64) -> u8 {
