@@ -7,10 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-frustum = "^0.2.1"
-euclid  = "^0.20"
-plotters = "^0.3.0"
-nalgebra = "^0.22"
+frustum   = "^0.2.1"
+euclid    = "^0.20"
+plotters  = "^0.3.0"
+nalgebra  = "^0.22"
+rayon     = "^1.4"
 thiserror = "^1.0"
 
 [dev-dependencies]

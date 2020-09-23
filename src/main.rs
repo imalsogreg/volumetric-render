@@ -3,6 +3,7 @@ pub(crate) mod gaussian;
 pub mod integrate;
 
 use frustum::Frustum;
+use nalgebra::{Matrix3};
 use plotters::coord::Shift;
 use plotters::{coord::types::RangedCoordf64, prelude::*};
 use std::ops::Range;
@@ -22,8 +23,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let y3 = y3 * Val::c(0.2);
     let gauss = g(P3::new(-0.0, 0.5, 0.0), example_matrix())?;
     let gauss2 = g(P3::new(-1.0, -5.0, 0.0), unit_matrix())?;
+    let gauss3 = g(P3::new(0.0, 0.0, 0.0), Matrix3::new(2.0, 0.1, 1.9, 0.1, 2.0, 0.1, 1.9, 0.1, 2.0))?;
 
-    let pdf = y3 + gauss * Val::c(0.8) + gauss2 * Val::c(0.8);
+    let pdf = gauss * Val::c(0.8) + gauss2 * Val::c(0.8) + gauss3;
     let pdf_2 = pdf.clone();
 
     let x = P3::new(1.0, 0.0, 0.0);
@@ -142,7 +144,7 @@ pub fn raytrace(v: Val) -> Result<(), Box<dyn std::error::Error>> {
     let plotting_area = chart.plotting_area();
 
     let frustum = Frustum {
-        origin: P3::new(-5.0, 0.0, -5.0),
+        origin: P3::new(-5.0, -5.0, -5.0),
         target: P3::new(0.0, 0.0, 0.0),
         fovy: 90.0,
         ncp: 1.0,
@@ -150,7 +152,7 @@ pub fn raytrace(v: Val) -> Result<(), Box<dyn std::error::Error>> {
         width: 300,
         height: 300,
     };
-    for (x,y,v) in render(v, frustum, 10.0, 1.0, 0.5) {
+    for (x,y,v) in render(v, frustum, 10.0, 1.0, 1.0) {
         let c = (v * 255.0) as u8;
         plotting_area.draw_pixel((x,y), &RGBColor(c, c, c))?;
     }

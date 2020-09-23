@@ -10,7 +10,7 @@ pub type V3 = Vector3D<f64, WorldSpace>;
 
 #[derive(Clone)]
 pub struct Val {
-    pub v: Arc<dyn Fn(P3) -> (f64, V3)>,
+    pub v: Arc<dyn Fn(P3) -> (f64, V3) + Send + Sync>,
 }
 
 impl Val {
