@@ -150,50 +150,58 @@ pub fn raytrace(v: Val) -> Result<(), Box<dyn std::error::Error>> {
 
         let fname = String::from(format!("movie/raytrace{:05}.png", i));
         println!("Working on frame {}", i);
-        let root = BitMapBackend::new(fname.as_str(), (300,300)).into_drawing_area();
+
+        let root = BitMapBackend::new(fname.as_str(), (600,300)).into_drawing_area();
         root.fill(&WHITE)?;
-        let mut chart = ChartBuilder::on(&root)
-            .margin(20)
-            .x_label_area_size(10)
-            .y_label_area_size(10)
-            .build_cartesian_2d(0.0..300.0, 0.0..300.0)?;
-        chart
-            .configure_mesh()
-            .disable_x_mesh()
-            .disable_y_mesh()
-            .draw()?;
-        let plotting_area = chart.plotting_area();
 
-        let my_v = v.clone();
-        let frame_rate = 20.0;
-        let circle_freq = 0.5;
-        let bounce_freq = 0.5;
-        let circle_phase = 2.0 * 3.14159 * i as f64 * circle_freq / frame_rate;
-        // let bounce_phase = 2.0 * 3.14159 * i as f64 * bounce_freq / frame_rate;
-        frustum.origin.x = 10.0 * circle_phase.cos();
-        frustum.origin.z = 10.0 * circle_phase.sin();
-        // frustum.origin.y = 0.2 * bounce_phase.cos();
-        //
-        fn to_range(v: f64, min: f64, max: f64) -> u8 {
-            let v_norm  = (v - min) / (max - min);
-            let v_clamp = v_norm.max(0.0).min(1.0);
-            (v_clamp * 255.0) as u8
-        }
+        for eye in (0..2) {
 
-        for (x,y,(v,p)) in render(my_v, frustum, 50.0, 1.0, 0.1) {
-            let c = (v * 155.0) as u8;
+            let eye_offset_x = 300.0 * (eye as f64);
+            let eye_offset_phase = (eye as f64) * 3.14459 / 4.0 ;
+            let mut chart = ChartBuilder::on(&root)
+                .margin(20)
+                .x_label_area_size(10)
+                .y_label_area_size(10)
+                .build_cartesian_2d(0.0..600.0, 0.0..300.0)?;
+            chart
+                .configure_mesh()
+                .disable_x_mesh()
+                .disable_y_mesh()
+                .draw()?;
+            let plotting_area = chart.plotting_area();
 
-            // plotting_area.draw_pixel((x,y), &RGBColor(
-            //     to_range(p.x, -10.0, 10.0),
-            //     to_range(p.y, -10.0, 10.0),
-            //     to_range(p.z, -10.0, 10.0)
-            // ))?;
+            let my_v = v.clone();
+            let frame_rate = 20.0;
+            let circle_freq = 0.5;
+            let bounce_freq = 0.5;
+            let circle_phase = 2.0 * 3.14159 * (i as f64 + eye_offset_phase) as f64 * circle_freq / frame_rate;
+            // let bounce_phase = 2.0 * 3.14159 * i as f64 * bounce_freq / frame_rate;
+            frustum.origin.x = 10.0 * circle_phase.cos();
+            frustum.origin.z = 10.0 * circle_phase.sin();
+            // frustum.origin.y = 0.2 * bounce_phase.cos();
+            //
+            fn to_range(v: f64, min: f64, max: f64) -> u8 {
+                let v_norm  = (v - min) / (max - min);
+                let v_clamp = v_norm.max(0.0).min(1.0);
+                (v_clamp * 255.0) as u8
+            }
 
-            plotting_area.draw_pixel((x,y), &RGBColor(
-                to_range(v, 0.0, 2.0),
-                to_range(v, 0.0, 2.0),
-                to_range(v.log(10.0), -2.5, 1.5)
-            ))?;
+            for (x,y,(v,p)) in render(my_v, frustum, 50.0, 1.0, 0.1) {
+                let c = (v * 155.0) as u8;
+
+                // plotting_area.draw_pixel((x,y), &RGBColor(
+                //     to_range(p.x, -10.0, 10.0),
+                //     to_range(p.y, -10.0, 10.0),
+                //     to_range(p.z, -10.0, 10.0)
+                // ))?;
+
+                plotting_area.draw_pixel((x + eye_offset_x + 0.0,y), &RGBColor(
+                    to_range(v, 0.0, 2.0),
+                    to_range(v, 0.0, 2.0),
+                    to_range(v.log(10.0), -2.5, 1.5)
+                ))?;
+            }
+
         }
     }
     Ok(())

@@ -28,7 +28,18 @@ Here are renderings of a gaussian mixture PDF, from a camera rotating around.
 
 ![gaussian mixture with camera further away](https://github.com/imalsogreg/volumetric-render/raw/master/images/pdf_afar.gif)
 
-I'm plotting the value linearly into Red and Green, and I plot the log of the value into Blue. I love this trick for highlighting the function's true value while allowing you to see the lower-value features that would otherwise be obscured by the larger values.
+I'm plotting the value linearly into Red and Green, and I plot the log of the
+value into Blue. I love this trick for highlighting the function's true value
+while allowing you to see the lower-value features that would otherwise be
+obscured by the larger values.
+
+At the request of [Scott Steele](https://github.com/scooter-dangle) from [Rust
+DC](https://www.meetup.com/RustDC/), ,
+a stereographic render. Cross your eyes to see the blobs popping out at you.
+
+![stereoscopic
+render](https://github.com/imalsogreg/volumetric-render/raw/master/images/pdf_stereo.gif)
+
 
 This final one is a rendering of the *gradient* of the PDF. The *x* derivitate is in Red, the *y* derivative is in Green and *z* is in Blue.
 
